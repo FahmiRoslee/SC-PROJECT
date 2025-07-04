@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextjs-app-deployment # Name of your deployment
+  labels:
+    app: nextjs-app # Labels for easy identification
+spec:
+  replicas: 1 # Number of pods to run (can be scaled up)
+  selector:
+    matchLabels:
+      app: nextjs-app # Selector matches pods with this label
+  template:
+    metadata:
+      labels:
+        app: nextjs-app # Labels applied to the pods created by this deployment
+    spec:
+      containers:
+        - name: nextjs-app-container # Name of the container
+          image: your-dockerhub-username/your-nextjs-app:latest # Your Docker image from Step 6
+          ports:
+            - containerPort: 3000 # The port your Next.js app listens on inside the container
+          env: # Environment variables for the container
+            - name: PORT # Next.js typically uses the PORT env var
+              value: "3000"
