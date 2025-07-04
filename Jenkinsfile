@@ -9,7 +9,7 @@ pipeline {
     // Define tools required for the pipeline.
     // 'NodeJS_18' should match the name configured in Jenkins Global Tool Configuration.
     tools {
-        nodejs 'NodeJS_18'
+        nodejs 'Node 22.3'
     }
 
     // Define environment variables.
