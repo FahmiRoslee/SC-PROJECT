@@ -1,0 +1,319 @@
+"use client"
+
+import React, { useEffect } from "react"
+import { useState } from "react"
+
+import {
+  ColumnDef,
+  ColumnFiltersState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  SortingState,
+  useReactTable,
+} from "@tanstack/react-table"
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@components/components/ui/table"
+
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@components/components/ui/dropdown"
+
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@components/components/ui/dialog";
+
+import {
+  DropdownField,
+  TextInputField,
+  DateInputField,
+  PhoneNumberField,
+  FileInputField,
+} from "@components/components/ui/customInputFeild";
+
+import { Button } from "@components/components/ui/button"
+import { Input } from "@components/components/ui/input"
+import { DataTablePagination } from "@components/components/ui/pagination"
+import { insertAnugerahRecord } from "./DataFetching"
+import { toast } from "sonner"
+
+
+interface DataTableProps<TData, TValue> {
+  columns: ColumnDef<TData, TValue>[]
+  data: TData[]
+  editable: boolean  
+  award_type: string
+}
+
+export function DataTable<TData, TValue>({
+  columns,
+  data,
+  editable,
+  award_type,
+}: DataTableProps<TData, TValue>) {
+
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] =useState<ColumnFiltersState>(
+    []
+  )
+
+  const [searchType, setSearchType] = useState("name");
+  
+  const table = useReactTable({
+    data,
+    columns,
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
+    state: {
+      sorting,
+      columnFilters,
+    },
+  })
+
+  return (
+    <div className="w-full">
+
+      {/* SEARCH , SORTING, ADD BUTTON*/}
+      <div className="flex justify-between items-center py-4">
+ 
+      </div>      
+
+      {/* TABLE CONTAINER */}
+      <div className="rounded-md border">
+        <Table>
+
+          {/* TABLE HEADER */}
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} href={""}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => {
+                const rowData = row.original as any;
+
+                return (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    href={null}
+                  >
+                    {row.getVisibleCells().map((cell) => {
+                      const columnId = cell.column.id;
+                      const value = cell.getValue();
+
+                      let bgColor = "";
+                      if (columnId === "unit") {
+                        if (value === "pemimpin" || value === "PEMIMPIN" ) {
+                          bgColor = "bg-yellow-200 text-black font-semibold px-2 py-1 rounded";
+                        } else if (value === "pkk" || value === "PKK") {
+                          bgColor = "bg-green-200 text-black font-semibold px-2 py-1 rounded";
+                        }
+                      }
+
+                      return (
+                        <TableCell key={cell.id}>
+                          {columnId === "unit" ? (
+                            <span className={bgColor}>{value}</span>
+                          ) : (
+                            flexRender(cell.column.columnDef.cell, cell.getContext())
+                          )}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                );
+              })
+            ) : (
+              <TableRow href={""}>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+
+
+        </Table>
+
+
+        {/* TABLE PAGINATION BUTTOM */}
+        <div className="my-5">
+          <DataTablePagination<TData> table={table} />
+        </div>
+      </div>
+
+      {/* TABLE INSERT DATA BUTTON */}
+      {editable ? (
+          <AddAnugerahDialog awardType={award_type} /> 
+      ) : 
+      null
+      }         
+    </div>
+
+  )
+}
+
+interface AddAnugerahDialogProps {
+  awardType: string;
+}
+
+const AddAnugerahDialog: React.FC<AddAnugerahDialogProps> = ({ awardType }) => {
+  const [previewAwardType, setPreviewAwardType] = useState(awardType);
+
+  useEffect(() => {
+    if (awardType === "PPM") {
+      setPreviewAwardType("Persekutuan Pengakap Malaysia")
+    }
+    else if  (awardType === "nonPPM") {
+      setPreviewAwardType("Kepengakan Daripada Negara Luar")
+    }
+  }, [awardType]);
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [awardName, setAwardName] = useState("");
+  const [awardLevel, setAwardLevel] = useState("");
+  const [awardYear, setAwardYear] = useState("");
+
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    const result = await insertAnugerahRecord({
+      user_id: "264eb21d-4338-408d-a8a2-c86affebe0b4",
+      awardName,
+      awardType,
+      awardLevel,
+      awardYear,
+    });
+
+    if (result.success) {
+      toast("Maklumat dihantar", {
+        description: "Maklumat anugerah berjaya dihantar.",
+        action: {
+          label: "OK",
+          onClick: () => console.log("Confirmed"),
+        },
+      });
+
+      setAwardLevel("");
+      setAwardYear("");
+
+    } else {
+      toast("Ralat semasa penghantaran", {
+        description: result.error?.message ?? "Sila cuba sekali lagi.",
+        action: {
+          label: "Tutup",
+          onClick: () => console.log("Tutup clicked"),
+        },
+      });
+    }
+
+    setIsLoading(false);
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline">Tambah</Button>
+      </DialogTrigger>
+
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Maklumat Anugerah Baharu</DialogTitle>
+          <DialogDescription>
+            Sila isikan maklumat anugerah anda dibawah.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="mt-2 flex w-full gap-5">
+          <TextInputField
+            id="namaAnugerah"
+            label="Nama Anugerah"
+            value={awardName}
+            onChange={(e) => setAwardName(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="mt-2 flex w-full gap-5">
+            <TextInputField
+              id="jenisAnugerah"
+              label="Jenis Anugerah"
+              value={previewAwardType}
+              required
+              readOnly
+              disabled
+              className="bg-muted"
+            />
+        </div>
+
+        <div className="mt-2 flex items-center space-x-2">
+          <div className="flex w-full gap-5">
+            <TextInputField
+              id="tahunAnugerah"
+              label="Tahun"
+              value={awardYear}
+              onChange={(e) => setAwardYear(e.target.value)}
+              required
+            />
+          </div>
+          <div className="flex w-full gap-5">
+            <TextInputField
+              id="peringkat"
+              label="Peringkat"
+              value={awardLevel}
+              onChange={(e) => setAwardLevel(e.target.value)}
+              required
+
+            />            
+          </div>
+        </div>
+
+        <DialogFooter className="sm:justify-start">
+          <DialogClose asChild>
+            <Button 
+              type="button" 
+              variant="secondary" 
+              onClick={handleSubmit} 
+              disabled={isLoading}
+            >
+              {isLoading ? "Memproses..." : "Hantar"}
+            </Button>
+
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
