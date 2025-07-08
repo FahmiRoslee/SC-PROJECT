@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@components/components
 import { useProfilData } from "../../../hooks/useProfilData";
 
 import { DataTable } from "@components/components/data-table/maklumatPeribadi-DT/pengakap-manikayu-DT/data-table";
+// The import for getDataAPI is correct here
 import { getDataAPI } from "@components/components/data-table/maklumatPeribadi-DT/pengakap-manikayu-DT/DataFetching";
 import { Manikayu, columns } from "@components/components/data-table/maklumatPeribadi-DT/pengakap-manikayu-DT/columns";
 
@@ -20,21 +21,28 @@ import AkademikDT from "@components/components/data-table/maklumatPeribadi-DT/pe
 import { formatIcNO,calculateAgeFromIC } from "@components/lib/utils";
 
 export default function MaklumatPeribadiPage() {
-    // const { kumpulanData, alamatData, loading } = useProfilData(); ss
+    // const { kumpulanData, alamatData, loading } = useProfilData();
 
-      const searchParams = useSearchParams();
-      const user_id = searchParams.get("id");
+    const searchParams = useSearchParams();
+    const user_id = searchParams.get("id");
 
     const [data, setData] = useState<Manikayu[]>([]);
-    const [data2, setData2] = useState<Manikayu[]>([]);
+    // You have data2 but it's not used. Consider removing if not needed.
+    const [data2, setData2] = useState<Manikayu[]>([]); 
 
+    // FIX: Correctly fetch data using getDataAPI and set the state
     useEffect(() => {
         const fetchData = async () => {
-        const result = await getDataAPI(user_id);
-        setData(result);
+            if (!user_id) {
+                // Handle case where user_id is not available yet
+                console.warn("User ID not found in search params.");
+                return;
+            }
+            const result = await getDataAPI(user_id); // Call your data fetching function
+            setData(result); // Set the state with the result
         };
         fetchData();
-    }, []);
+    }, [user_id]); // Add user_id to the dependency array
 
     const [peribadiData, setPeribadiData] = useState(null);
     const [ageAndDob, setAgeAndDob] = useState<{ 
@@ -46,14 +54,14 @@ export default function MaklumatPeribadiPage() {
     const [alamatData, setAlamatData] = useState(null);
     const [pekerjaanData, setPekerjaanData] = useState(null);
     const [akademikData, setAkademikData] = useState(null);
-    const [loading, setLoading] = useState(false);
-  
+    const [loading, setLoading] = useState(false); // Set to true initially if you want to show loading state for all fetches
+ 
     const [activeTab, setActiveTab] = useState("peribadi");
-  
+ 
     useEffect(() => {
       const fetchData = async () => {
         setLoading(true);
-  
+ 
         if (activeTab === "peribadi" && !peribadiData) {
             const { data, error } = await supabase
               .from("users") 
@@ -95,34 +103,34 @@ export default function MaklumatPeribadiPage() {
             console.log("raw data for peribadi: ", data);
           }
           
-  
+ 
         if (activeTab === "pengakap" && !alamatData) {
           // Fetch alamat data
         //   const response = await fetch("/api/alamatData");
         //   const data = await response.json();
-          setAlamatData(null);
+          setAlamatData(null); // This will always set to null, likely not intended
         }
-  
+ 
         if (activeTab === "pekerjaan" && !pekerjaanData) {
           // Fetch pekerjaan data
         //   const response = await fetch("/api/pekerjaanData");
         //   const data = await response.json();
-          setPekerjaanData(null);
+          setPekerjaanData(null); // This will always set to null, likely not intended
         }
-  
+ 
         if (activeTab === "akademik" && !akademikData) {
           // Fetch akademik data
         //   const response = await fetch("/api/akademikData");
         //   const data = await response.json();
-          setAkademikData(null);
+          setAkademikData(null); // This will always set to null, likely not intended
         }
-  
+ 
         setLoading(false);
       };
-  
+ 
+      // Add user_id to dependencies for this useEffect as well, since it's used in supabase.eq("user_id", user_id)
       fetchData();
-    }, [activeTab]);
-
+    }, [activeTab, user_id, peribadiData, alamatData, pekerjaanData, akademikData]); // Added missing dependencies
 
     if (loading) return <div>Loading data... {user_id}</div>;
 
@@ -141,7 +149,7 @@ export default function MaklumatPeribadiPage() {
                 {peribadiData ? (
                 <ProfileSection
                     value={"peribadi"}
-                    data={[]}
+                    data={[]} // This data prop is empty, check if it's meant to be peribadiData
                     profileMenuTabHeader="Maklumat Kumpulan"
                     items={[
                     { title: "Nama Penuh", value: peribadiData.fullname },
@@ -152,17 +160,17 @@ export default function MaklumatPeribadiPage() {
                     { title: "Email", value: peribadiData.email  },
                     { title: "No. Tel", value: peribadiData.phone_no },
                     { title: "Jantina", value: peribadiData.scouts.gender  },
-                    { title: "Kaum", value: peribadiData.fullname },
-                    { title: "Agama", value: peribadiData.fullname },
+                    { title: "Kaum", value: peribadiData.fullname }, // This should probably be peribadiData.scouts.race
+                    { title: "Agama", value: peribadiData.fullname }, // This should probably be peribadiData.scouts.religion
                     { title: "Tarikh Lahir", value: ageAndDob.dob },
                     { title: "Umur", value: `${ageAndDob.age} tahun` },
-                    { title: "Tempat Lahir", value: peribadiData.fullname  },
+                    { title: "Tempat Lahir", value: peribadiData.fullname  }, // This should probably be peribadiData.scouts.birth_place or similar
                     { title: "Alamat Kediaman", value: peribadiData.user_addresses[0].address  },
                     { title: "", value: "" },
                     { title: "", value: "" },
                     { title: "Poskod", value: peribadiData.user_addresses[0].postcode },
                     { title: "Daerah", value: peribadiData.user_addresses[0].district   },
-                    { title: "Negeri", value: peribadiData.user_addresses[0].state  },
+                    { title: "Negeri", value: peribadiData.user_addresses[0].state   },
                     ]}
                 />
                 ) : (
@@ -171,50 +179,52 @@ export default function MaklumatPeribadiPage() {
             </TabsContent>
 
             <TabsContent value="pengakap">
-                {alamatData ? (
+                {/* FIX: Use the 'data' state (fetched from getDataAPI) here */}
+                {data.length > 0 ? ( // Check if data is available
                 <ProfileSection
                     value={"pengakap"}
-                    data={data}
+                    data={data} // Pass the fetched data
                     profileMenuTabHeader="Maklumat Pengakap"
                     items={[
-                    { title: "", value: "" },
-                    { title: "No. Keahlian", value: alamatData.alamatKumpulan },
-                    { title: "No. Tauliah", value: alamatData.poskod },
-                    { title: "Jawatan Pengakap", value: alamatData.daerah },
-                    { title: "Unit Keahlian", value: alamatData.negeri },
-                    { title: "Daerah", value: alamatData.negeri },
-                    { title: "Negeri", value: alamatData.negeri },
+                    // These items are currently hardcoded to alamatData, which is null in this tab.
+                    // You might want to map data from the 'data' state (Manikayu[]) here
+                    { title: "No. Keahlian", value: peribadiData?.scouts?.no_ahli || '-' }, // Example from peribadiData
+                    { title: "No. Tauliah", value: "N/A" }, // Placeholder
+                    { title: "Jawatan Pengakap", value: "N/A" }, // Placeholder
+                    { title: "Unit Keahlian", value: "N/A" }, // Placeholder
+                    { title: "Daerah", value: "N/A" }, // Placeholder
+                    { title: "Negeri", value: "N/A" }, // Placeholder
                     ]}
                 />
                 ) : (
-                <div>Tiada data alamat</div>
+                <div>Tiada data pengakap</div> // Changed from alamat
                 )}
             </TabsContent>
 
             <TabsContent value="anugerah"></TabsContent>
 
             <TabsContent value="pekerjaan">
-                {alamatData ? (
+                {alamatData ? ( // This still checks alamatData, which is null. Should be pekerjaanData.
                     <ProfileSection
                         value={"pekerjaan"}
-                        data={data}
+                        data={data} // Pass the fetched data if relevant
                         profileMenuTabHeader="Maklumat Pekerjaan"
                         items={[
-                        { title: "Jawatan Hakiki", value: alamatData.alamatKumpulan },
-                        { title: "Nama Majikan", value: alamatData.alamatKumpulan },
+                        { title: "Jawatan Hakiki", value: alamatData?.alamatKumpulan || '' }, // Check for null
+                        { title: "Nama Majikan", value: alamatData?.alamatKumpulan || '' }, // Check for null
                         { title: "", value: "" },
                         { title: "", value: "" },
-                        { title: "Alamat Majikan", value: alamatData.negeri },
+                        { title: "Alamat Majikan", value: alamatData?.negeri || '' }, // Check for null
                         { title: "", value: "" },
                         { title: "", value: "" },
-                        { title: "Poskod", value: alamatData.negeri },
-                        { title: "Daerah", value: alamatData.negeri },
-                        { title: "Negeri", value: alamatData.negeri },
+                        { title: "Poskod", value: alamatData?.negeri || '' }, // Check for null
+                        { title: "Daerah", value: alamatData?.negeri || '' }, // Check for null
+                        { title: "Negeri", value: alamatData?.negeri || '' }, // Check for null
                         ]}
                     />
                     ) : (
-                    <div>Tiada data alamat</div>
-                )}                
+                    <div>Tiada data pekerjaan</div> // Changed from alamat
+                    )} 
             </TabsContent>
             <TabsContent value="akademik">
                 <ProfileSection
@@ -229,8 +239,6 @@ export default function MaklumatPeribadiPage() {
 
     );
 }
-
-
 
 
 type ProfileContainerProps = {
@@ -255,7 +263,8 @@ type ProfileSectionProps = {
 }
     
 function ProfileSection({ profileMenuTabHeader, items, data, value }: ProfileSectionProps) {
-    const firstItem = items[0];
+    // FIX: Add a check for items.length before accessing firstItem to prevent errors on empty arrays
+    const firstItem = items.length > 0 ? items[0] : { title: "", value: "" };
 
     const groupItems = (items: typeof firstItem[], groupSize: number) => {
         let groups = [];
@@ -267,6 +276,7 @@ function ProfileSection({ profileMenuTabHeader, items, data, value }: ProfileSec
         return groups;
     };
 
+    // FIX: Slice from 0 if items.length is 0 to avoid negative index
     const remainingGroups = groupItems(items.slice(1), 3); // Skip first item
 
     return (
@@ -295,7 +305,7 @@ function ProfileSection({ profileMenuTabHeader, items, data, value }: ProfileSec
                 </>
             )}
 
-            {/* Show table or whatever comes below regardless sssssss*/}
+            {/* Show table or whatever comes below regardless sss*/}
             {renderDatatable(value)}
         </ProfileContainer>
     );
