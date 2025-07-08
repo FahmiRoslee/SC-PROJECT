@@ -12,10 +12,14 @@ pipeline {
         nodejs 'Node 22.3' // <--- ENSURE THIS NAME MATCHES YOUR JENKINS CONFIG EXACTLY
     }
 
-    // Define environment variables.
-    // NODE_OPTIONS is important for Next.js builds on some systems.
-    environment {
-        NODE_OPTIONS = '--max-old-space-size=4096' // Increase memory for Node.js builds if needed
+     environment {
+        NODE_OPTIONS = '--max-old-space-size=4096'
+        // Add your Supabase environment variables here
+        // IMPORTANT: Replace with your actual Supabase URL and Anon Key
+        NEXT_PUBLIC_SUPABASE_URL = 'https://uhywazmkjkmjmodxangg.supabase.co' // Replace with your Supabase URL
+        NEXT_PUBLIC_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVoeXdhem1ramttam1vZHhhbmdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQyNjQ1NTksImV4cCI6MjA1OTg0MDU1OX0.xWlwGIJHXxK1aXS2v6t-SEtxIEqhwzNF45r-a7SA4Ho' // Replace with your Supabase Anon Key
+        // If you have a service role key, DO NOT expose it in the frontend build.
+        // Only use NEXT_PUBLIC_... variables for client-side accessible keys.
     }
 
     // Define the stages of your CI/CD pipeline.
