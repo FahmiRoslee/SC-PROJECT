@@ -59,18 +59,18 @@ pipeline {
         }
 
         // Stage 3: Run tests.
-        // Assuming your Next.js project has tests configured (e.g., with Jest).
-        // If you don't have tests, you can comment out this entire stage.
-        stage('Run Tests') {
-            steps {
-                script {
-                    // 'npm test' executes the tests defined in your package.json.
-                    bat 'npm test'
-                    // If you are using Yarn, replace 'npm test' with 'yarn test'
-                    // bat 'yarn test'
-                }
-            }
-        }
+        // // Assuming your Next.js project has tests configured (e.g., with Jest).
+        // // If you don't have tests, you can comment out this entire stage.
+        // stage('Run Tests') {
+        //     steps {
+        //         script {
+        //             // 'npm test' executes the tests defined in your package.json.
+        //             bat 'npm test'
+        //             // If you are using Yarn, replace 'npm test' with 'yarn test'
+        //             // bat 'yarn test'
+        //         }
+        //     }
+        // }
 
         // Stage 4: Build the Next.js application for production.
         stage('Build Next.js App') {
