@@ -20,7 +20,7 @@ import AkademikDT from "@components/components/data-table/maklumatPeribadi-DT/pe
 import { formatIcNO,calculateAgeFromIC } from "@components/lib/utils";
 
 export default function MaklumatPeribadiPage() {
-    // const { kumpulanData, alamatData, loading } = useProfilData();
+    // const { kumpulanData, alamatData, loading } = useProfilData(); ss
 
       const searchParams = useSearchParams();
       const user_id = searchParams.get("id");
@@ -30,7 +30,7 @@ export default function MaklumatPeribadiPage() {
 
     useEffect(() => {
         const fetchData = async () => {
-        const result = await setData();
+        const result = await getDataAPI(user_id);
         setData(result);
         };
         fetchData();
