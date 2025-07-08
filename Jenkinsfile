@@ -88,16 +88,23 @@ pipeline {
             }
         }
 
+        // ... (previous stages) ...
+
         // Stage 5: Build the Docker image for your Next.js application.
         stage('Build Docker Image') {
             steps {
                 script {
                     // Build the Docker image using the Dockerfile in the project root.
-                    // Tag the image with your Docker Hub username and repository name.
-                    bat 'docker build -t your-dockerhub-username/your-nextjs-app:latest .' // <--- YOUR DOCKER HUB USERNAME/REPO
+                    // Tag the image and pass build-args for Supabase credentials.
+                    bat "docker build " +
+                        "--build-arg NEXT_PUBLIC_SUPABASE_URL=${env.NEXT_PUBLIC_SUPABASE_URL} " +
+                        "--build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=${env.NEXT_PUBLIC_SUPABASE_ANON_KEY} " +
+                        "-t your-dockerhub-username/your-nextjs-app:latest ." // <--- YOUR DOCKER HUB USERNAME/REPO
                 }
             }
         }
+
+// ... (rest of your Jenkinsfile) ...
 
         // Stage 6: Push the Docker image to Docker Hub.
         stage('Push Docker Image to Docker Hub') {
