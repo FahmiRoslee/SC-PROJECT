@@ -2,6 +2,7 @@ import { supabase } from "@components/lib/supabaseClient";
 import { Manikayu } from "./columns";
 import { formatDate } from "@components/lib/utils";
 
+
 export async function getDataMock(): Promise<Manikayu[]> {
   return [
     {

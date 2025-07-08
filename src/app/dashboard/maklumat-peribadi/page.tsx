@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@components/components
 import { useProfilData } from "../../../hooks/useProfilData";
 
 import { DataTable } from "@components/components/data-table/maklumatPeribadi-DT/pengakap-manikayu-DT/data-table";
-import { getData } from "@components/components/data-table/maklumatPeribadi-DT/pengakap-manikayu-DT/DataFetching";
+import { getDataAPI } from "@components/components/data-table/maklumatPeribadi-DT/pengakap-manikayu-DT/DataFetching";
 import { Manikayu, columns } from "@components/components/data-table/maklumatPeribadi-DT/pengakap-manikayu-DT/columns";
 
 import JawatanDT from "@components/components/data-table/maklumatPeribadi-DT/pengakap-jawatan-DT/jawatanDT"
@@ -30,7 +30,7 @@ export default function MaklumatPeribadiPage() {
 
     useEffect(() => {
         const fetchData = async () => {
-        const result = await getData();
+        const result = await setData();
         setData(result);
         };
         fetchData();
@@ -295,7 +295,7 @@ function ProfileSection({ profileMenuTabHeader, items, data, value }: ProfileSec
                 </>
             )}
 
-            {/* Show table or whatever comes below regardless */}
+            {/* Show table or whatever comes below regardless sss*/}
             {renderDatatable(value)}
         </ProfileContainer>
     );
@@ -309,7 +309,7 @@ function renderDatatable(caseValue: string) {
                         <div className="mt-6 mb-0 font-sans font-semibold">
                             Senarai Manikayu
                         </div>
-                        <ManikayuDT/>
+                        <ManikayuDT editable={false}/>
                         <div className="mt-6 mb-0 font-sans font-semibold">
                             Senarai Jawatan
                         </div>                        
