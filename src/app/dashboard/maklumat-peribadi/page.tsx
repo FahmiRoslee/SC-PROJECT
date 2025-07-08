@@ -295,7 +295,7 @@ function ProfileSection({ profileMenuTabHeader, items, data, value }: ProfileSec
                 </>
             )}
 
-            {/* Show table or whatever comes below regardless sss*/}
+            {/* Show table or whatever comes below regardless sssssss*/}
             {renderDatatable(value)}
         </ProfileContainer>
     );
