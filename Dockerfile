@@ -1,4 +1,4 @@
-Stage 1: Build the Next.js application
+# Stage 1: Build the Next.js application
 # Use a Node.js image as the base for building
 FROM node:18-alpine as builder
 
