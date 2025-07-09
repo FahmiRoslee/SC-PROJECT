@@ -140,7 +140,7 @@ pipeline {
     post {
         always {
             // Optional: You can add steps here to notify Jira about the build status.
-            // Example (requires Jira plugin configuration):
+            // Example (requires Jira plugin configuration):sssss
             jiraIssueUpdater jiraSite: 'ScProjectJira', issueId: 'SCRUM-XXX', result: currentBuild.result
             echo "Pipeline finished with status: ${currentBuild.result}"
         }
